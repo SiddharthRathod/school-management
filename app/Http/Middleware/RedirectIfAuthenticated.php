@@ -22,8 +22,13 @@ class RedirectIfAuthenticated
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+            //it redirect to login if user authenticated respected to its role
+            if( Auth::guard($guard)->check() && (Auth::user()->role === 'student' || Auth::user()->role === 'parent') ) {
+                return redirect()->route('user.dashboard');
+            } else if( Auth::guard($guard)->check() && Auth::user()->role === 'teacher' ) {
+                return redirect()->route('teacher.dashboard');
+            } else if( Auth::guard($guard)->check() && Auth::user()->role === 'admin' ) {
+                return redirect()->route('admin.dashboard');
             }
         }
 
