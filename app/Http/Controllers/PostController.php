@@ -51,8 +51,10 @@ class PostController extends Controller {
             $post = Post::create($formData);
 
             if($post){
-                // Dispatch the job
-                SendPostCreatedNotification::dispatch($post);
+                if(Auth::user()->role === 'teacher' && !empty($request->targete_user)) {
+                    // Dispatch the job
+                    SendPostCreatedNotification::dispatch($post);
+                }
                 session()->flash('success',__('Post Added successfully'));
             } else {
                 session()->flash('error',__('Post Not Added, Please try again'));
