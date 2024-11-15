@@ -1,0 +1,213 @@
+https://www.youtube.com/watch?v=sKyMRdzYgXw
+
+install laravel -> composer create-project laravel/laravel=4.1.27 your-project-name --prefer-dist
+
+	           composer create-project laravel/laravel project-name --prefer-dist
+	           composer create-project laravel/laravel="8.*" test-app
+
+- composer require laravel/ui
+
+- php artisan ui bootstrap --auth
+
+- npm install && npm run dev
+
+- Set prefix 1, set variable in .env file eg. DB_TABLE_PREFIX=pre_
+	2, config/database.php -> 'prefix' => env('DB_TABLE_PREFIX', ''), in mysql
+
+- Add column to create_users_table.php -> $table->boolean('role')->nullable(); after email
+
+- Create database and give its name to .env file
+
+- php artisan migrate
+- for Syntax error or access violation: 1071 Specified key was too long; max key length is 1000 bytes - set collation value in config/database.php in my'mysql' => []
+     'charset' -> utf8
+     'collation' -> utf8_general_ci
+
+- Generating Migrations
+    - php artisan make:migration create_flights_table
+- Add perticular migration table
+   -> php artisan migrate --path=/database/migrations/2021_07_12_065338_create_modules_table.php
+
+- php artisan make:controller AdminController
+- php artisan make:controller UserController
+
+- import controllers to web.php file and create routes for admin and users
+
+- add 'role' to User Model ($fillable)
+
+- Add protected function redirectTo() to LoginController
+
+- Add login function to LoginController
+
+- add 'role' to Register Controller
+
+- php artisan make:middleware isAdminMiddleware
+- php artisan make:middleware isUserMiddleware
+
+- Auth admin in isAdminMiddleware
+-  register: 'isAdmin' => \App\Http\Middleware\isAdminMiddleware::class, - to Kernel.php
+
+- Auth user in isUserMiddleware
+-  register: 'isUser' => \App\Http\Middleware\isAdminMiddleware::class, - to Kernel.php
+
+- Add 'middleware'=>['isAdmin','auth'] and 'middleware'=>['isUser','auth'] - to web.php
+
+- Middleware/RedirectIfAuthenticated.php -> add redirect code to handle() function
+
+- Test Register and login
+
+- if user don't login after registration 
+  	vendor\laravel\ui\auth-backend\RegistersUsers.php -> comment below line
+	/* User login directly after signup */
+        //$this->guard()->login($user);
+  AND
+  	App\Http\Controllers\HomeController.php
+		public function __construct() {
+        		//$this->middleware('auth');
+    		}	
+
+- Create views files and add its methods to controllers -> index, profile, settings and write its
+
+- Add favoriteColor column to DB and User model to $fillable
+
+- Add favoriteColor to Register Controller AND view
+
+- Create PreventBackHistory middle for user can go his dashboard/auth by login pages after logout usign back button
+    - php artisan make:middleware PreventBackHistory
+    - and add code in handle()
+    
+- register 'PreventBackHistory' => \App\Http\Middleware\PreventBackHistory::class, - to Kernel.php
+- Add PreventBackHistory to web.php in middleware
+
+- create middleware PreventBackHistory group and put Auth::routes(); under it
+
+- Crate layout
+- past source file public folder eg: css,js,img
+
+
+- how to create new user and prevent older login
+    - comment create() and create new register method
+    
+    
+Integrate Admin LTE Template
+ - https://www.youtube.com/watch?v=kSiX5z2AmwM
+ 
+ 
+- for show current page active link 
+    - {{ (request()->is('admin/dashboard*')) ? 'active' : '' }}
+    
+- Update using Ajax -> https://www.youtube.com/watch?v=Xict2f5RnTg
+    - Add : <meta name="csrf-token" content="{{ csrf_token() }}"> to head for every ajax request
+    - Add: $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+    - Add - admin-dash-layout.blade.php  for every ajax call
+    - e.preventDefault(); //prevent page refresh on form submit in jquery
+    
+Uplopading - pic using ajax -> https://www.youtube.com/watch?v=PfTNwPVAvzs
+ - Cropping tool ->https://github.com/Mbere250/ijaboCropTool
+
+
+Upload multiple images:
+https://www.youtube.com/watch?v=hx__ZkYQ-8s
+
+
+For install Yajra
+https://yajrabox.com/docs/laravel-datatables/master/installation
+
+Run the following command in your project to get the latest version of the package:
+	composer require yajra/laravel-datatables-oracle:"~9.0"
+
+If you are using most of the DataTables plugins like Buttons & Html, you can alternatively use the all-in-one installer package.	
+	composer require yajra/laravel-datatables:^1.5
+
+
+For create markdown emails:
+php artisan make:mail SignupForUser --markdown=emails.users.signup
+
+
+Create composer with Resources:
+php artisan make:controller PhotoController --resource --model=Photo
+
+
+put registration email in queue
+https://www.youtube.com/watch?v=rVx8xKisbr8
+
+
+
+
+
+-create - notificaton
+	php artisan make:notification RegisterUserNotification
+
+-Mark-down notifications:
+	php artisan make:notification user/RegisterUserNotification --markdown=emails.user.register
+
+-show in -> app/Notifications
+
+-register controller:
+
+	use Illuminate\Support\Facades\Notification;
+	use App\Notifications\RegisterUserNotification;
+
+	//send single user notification
+	$user = new User();
+        $user->name = $request->name;
+        
+	$user->notify(new RegisterUserNotification($user));
+
+
+	//send multiple user notification
+	$users = User::where(['role'=>1])->get();       
+        Notification::send($users, new RegisterUserNotification($user));
+
+
+-Create queue Drivers:
+
+	php artisan queue:table
+	php artisan migrate --path=/database/migrations/2021_12_09_061419_create_jobs_table.php
+-.env
+	QUEUE_CONNECTION=database
+
+	-> FOR DEBUG queue error make:
+	   QUEUE_CONNECTION=sync
+
+
+-Implements queue:
+	RegisterUserNotification extends Notification implements ShouldQueue
+
+
+cron command for live server:
+ 	php /home3/theprale/public_html/dev/artisan schedule:run >> /dev/null 2>&1
+
+app/Console/Kernel.php
+	protected $commands = [
+        	//DemoCron::class,
+        	MembershipCron::class
+    	];
+
+    /**
+     * Define the application's command schedule.
+     *
+     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @return void
+     */
+    protected function schedule(Schedule $schedule)
+    {
+        // $schedule->command('inspire')->hourly();
+        //$schedule->command('demo.cron')->everyMinute();
+        $schedule->command('membership:cron')->everyMinute();        
+        /* For queue job worker process */
+        $schedule->command('queue:work')->everyMinute()->runInBackground()
+                ->onSuccess(function (Stringable $output) {  })
+                ->onFailure(function (Stringable $output) { \Log::info($output); });
+    }
+
+
+customize header and footer for all emails theme
+https://webomnizz.com/laravel-notification-customize-markdown-email-header-and-footer/
+
+
+
