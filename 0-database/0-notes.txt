@@ -4,6 +4,7 @@ install laravel -> composer create-project laravel/laravel=4.1.27 your-project-n
 
 	           composer create-project laravel/laravel project-name --prefer-dist
 	           composer create-project laravel/laravel="8.*" test-app
+               composer create-project laravel/laravel laravel_8 "8.6.*" laravel_8 
 
 - composer require laravel/ui
 
